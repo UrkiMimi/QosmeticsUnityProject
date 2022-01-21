@@ -1,0 +1,38 @@
+﻿using UnityEngine;
+using Newtonsoft.Json;
+
+namespace Qosmetics.Core
+{
+    public interface IExportable
+    {
+        PackageInfo PackageJson { get; }
+    }
+
+    [System.Serializable]
+    public class PackageInfo
+    {
+        public string androidFileName;
+        public string pcFileName;
+        public Descriptor descriptor;
+        public Config config;
+
+        public string ToJson()
+        {
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
+        }
+    }
+
+    [System.Serializable]
+    public class Descriptor
+    {
+        public string objectName;
+        public string author;
+        public string description;
+    }
+
+    [System.Serializable]
+    public class Config
+    {
+
+    }
+}
