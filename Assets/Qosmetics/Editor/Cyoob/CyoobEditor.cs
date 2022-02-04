@@ -8,8 +8,8 @@ using System.IO;
 public class CyoobEditor : Editor
 {
     public static string Extension { get => "cyoob"; }
-    bool packageSettingsOpened = false;
-    bool objectSettingsOpened = false;
+    bool packageSettingsOpened = true;
+    bool objectSettingsOpened = true;
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
