@@ -52,9 +52,13 @@ namespace Qosmetics.Notes
         [SerializeField]
         private GameObject rightDebris;
         [SerializeField]
-        private GameObject leftSlinky;
+        private GameObject leftHead;
         [SerializeField]
-        private GameObject rightSlinky;
+        private GameObject rightHead;
+        [SerializeField]
+        private GameObject leftLink;
+        [SerializeField]
+        private GameObject rightLink;
 
         public bool ValidateObject()
         {
@@ -68,12 +72,14 @@ namespace Qosmetics.Notes
             leftDebris = transform.Find("Debris/LeftDebris")?.gameObject;
             rightDebris = transform.Find("Debris/RightDebris")?.gameObject;
 
-            leftSlinky = transform.Find("Sliders/LeftSlider")?.gameObject;
-            rightSlinky = transform.Find("Sliders/RightSlider")?.gameObject;
+            leftHead = transform.Find("Chains/LeftHead")?.gameObject;
+            rightHead = transform.Find("Chains/RightHead")?.gameObject;
+            leftLink = transform.Find("Chains/LeftLink")?.gameObject;
+            rightLink= transform.Find("Chains/RightLink")?.gameObject;
 
             config.hasBomb = bomb != null;
             config.hasDebris = leftDebris != null && rightDebris != null;
-            config.hasSlider = leftSlinky != null && rightSlinky != null;
+            config.hasSlider = leftHead != null && rightHead != null && leftLink != null && rightLink != null;
 
             List<MeshRenderer> meshRenderers = new List<MeshRenderer> {};
 
@@ -84,10 +90,14 @@ namespace Qosmetics.Notes
 
             if (bomb != null)
                 meshRenderers.AddRange(bomb.GetComponentsInChildren<MeshRenderer>(true));
-            if (leftSlinky != null)
-                meshRenderers.AddRange(leftSlinky.GetComponentsInChildren<MeshRenderer>(true));
-            if (rightSlinky != null)
-                meshRenderers.AddRange(rightSlinky.GetComponentsInChildren<MeshRenderer>(true));
+            if (leftHead != null)
+                meshRenderers.AddRange(leftHead.GetComponentsInChildren<MeshRenderer>(true));
+            if (rightHead != null)
+                meshRenderers.AddRange(rightHead.GetComponentsInChildren<MeshRenderer>(true));
+            if (leftLink != null)
+                meshRenderers.AddRange(leftLink.GetComponentsInChildren<MeshRenderer>(true));
+            if (rightLink != null)
+                meshRenderers.AddRange(rightLink.GetComponentsInChildren<MeshRenderer>(true));
 
             config.isMirrorable = true;
             foreach (var renderer in meshRenderers)
