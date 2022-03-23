@@ -52,6 +52,14 @@ namespace Qosmetics.Notes
         [SerializeField]
         private GameObject rightDebris;
         [SerializeField]
+        private GameObject leftChainHeadDebris;
+        [SerializeField]
+        private GameObject rightChainHeadDebris;
+        [SerializeField]
+        private GameObject leftChainLinkDebris;
+        [SerializeField]
+        private GameObject rightChainLinkDebris;
+        [SerializeField]
         private GameObject leftHead;
         [SerializeField]
         private GameObject rightHead;
@@ -71,6 +79,10 @@ namespace Qosmetics.Notes
 
             leftDebris = transform.Find("Debris/LeftDebris")?.gameObject;
             rightDebris = transform.Find("Debris/RightDebris")?.gameObject;
+            leftChainHeadDebris = transform.Find("ChainHeadDebris/LeftDebris")?.gameObject;
+            rightChainHeadDebris = transform.Find("ChainHeadDebris/RightDebris")?.gameObject;
+            leftChainLinkDebris = transform.Find("ChainLinkDebris/LeftDebris")?.gameObject;
+            rightChainLinkDebris = transform.Find("ChainLinkDebris/RightDebris")?.gameObject;
 
             leftHead = transform.Find("Chains/LeftHead")?.gameObject;
             rightHead = transform.Find("Chains/RightHead")?.gameObject;
@@ -79,6 +91,9 @@ namespace Qosmetics.Notes
 
             config.hasBomb = bomb != null;
             config.hasDebris = leftDebris != null && rightDebris != null;
+
+            config.hasChainHeadDebris = leftChainHeadDebris != null && rightChainHeadDebris != null;
+            config.hasChainLinkDebris = leftChainLinkDebris != null && rightChainLinkDebris != null;
             config.hasSlider = leftHead != null && rightHead != null && leftLink != null && rightLink != null;
 
             List<MeshRenderer> meshRenderers = new List<MeshRenderer> {};
@@ -124,6 +139,8 @@ namespace Qosmetics.Notes
     public class Config : Qosmetics.Core.Config
     {
         public bool hasDebris = false;
+        public bool hasChainHeadDebris = false;
+        public bool hasChainLinkDebris = false;
         public bool hasSlider = false;
         public bool hasBomb = false;
         public bool showArrows = true;
