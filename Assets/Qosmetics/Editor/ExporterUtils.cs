@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEditor;
 using System.IO;
 using System.IO.Compression;
@@ -26,20 +27,24 @@ namespace Qosmetics.Core
             exporting = true;
             try
             {
+                GameObject toExport = UnityEngine.Object.Instantiate(gameObject);
                 string fileName = Path.GetFileName(path);
                 string folderPath = Path.GetDirectoryName(path);
 
-                PackageInfo packageJson = gameObject.GetComponent<IExportable>().PackageJson;
-
+                IExportable exportable = toExport.GetComponent<IExportable>();
+                PackageInfo packageJson = exportable.PackageJson;
+                
                 string androidFileName = packageJson.androidFileName;
                 string pcFileName = packageJson.pcFileName;
+                exportable.OnExport();
 
-                Selection.activeObject = gameObject;
-                EditorUtility.SetDirty(gameObject);
-                EditorSceneManager.MarkSceneDirty(gameObject.scene);
-                EditorSceneManager.SaveScene(gameObject.scene);
+                UnityEngine.Object.DestroyImmediate(exportable as MonoBehaviour);
+                EditorUtility.SetDirty(toExport);
+                EditorSceneManager.MarkSceneDirty(toExport.scene);
+                EditorSceneManager.SaveScene(toExport.scene);
 
-                PrefabUtility.SaveAsPrefabAsset(Selection.activeObject as GameObject, $"Assets/Qosmetics/{prefabName}.prefab");
+                PrefabUtility.SaveAsPrefabAsset(toExport, $"Assets/Qosmetics/{prefabName}.prefab");
+                UnityEngine.Object.DestroyImmediate(toExport);
 
                 AssetBundleBuild assetBundleBuild = default(AssetBundleBuild);
 
@@ -61,6 +66,8 @@ namespace Qosmetics.Core
                 $"{WorkingDir}/package.json"
                 };
 
+                if (File.Exists($"{WorkingDir}/tempzip.zip"))
+                    File.Delete($"{WorkingDir}/tempzip.zip");
                 CreateZipFile($"{WorkingDir}/tempzip.zip", files);
 
                 if (File.Exists(path)) File.Delete(path);
@@ -104,6 +111,17 @@ namespace Qosmetics.Core
             }
             // Dispose of the object when we are done
             zip.Dispose();
+        }
+
+        public static void CompletelyUnpackPrefab(this Transform root)
+        {
+            if (PrefabUtility.GetPrefabInstanceStatus(root) != PrefabInstanceStatus.NotAPrefab)
+                PrefabUtility.UnpackPrefabInstance(PrefabUtility.GetOutermostPrefabInstanceRoot(root), PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+
+            for (int i = 0; i < root.childCount; i++)
+            {
+                root.GetChild(i).CompletelyUnpackPrefab();
+            }
         }
     }
 }

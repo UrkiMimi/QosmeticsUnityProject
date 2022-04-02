@@ -30,11 +30,14 @@ namespace Qosmetics.Notes
             set => packageJson.descriptor.description = value;
         }
 
-        public PackageInfo PackageJson { get 
-                {
+        public PackageInfo PackageJson
+        {
+            get
+            {
                 packageJson.config = config;
                 return packageJson;
-            } }
+            }
+        }
 
         public bool ShowArrows { get => config.showArrows; set => config.showArrows = value; }
         [SerializeField]
@@ -132,6 +135,11 @@ namespace Qosmetics.Notes
                 if (!config.isMirrorable) break;
             }
             return leftArrow != null && rightArrow != null && leftDot != null && rightDot != null;
+        }
+
+        public void OnExport()
+        {
+            Destroy(this);
         }
     }
     

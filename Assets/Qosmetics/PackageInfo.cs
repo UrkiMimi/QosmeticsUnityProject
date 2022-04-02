@@ -6,6 +6,7 @@ namespace Qosmetics.Core
     public interface IExportable
     {
         PackageInfo PackageJson { get; }
+        void OnExport();
     }
 
     [System.Serializable]
