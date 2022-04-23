@@ -12,8 +12,8 @@ namespace Qosmetics.Core
     [System.Serializable]
     public class PackageInfo
     {
-        public string androidFileName;
-        public string pcFileName;
+        public string androidFileName = "_android";
+        public string pcFileName = "_pc";
         public Descriptor descriptor;
         public Config config;
 
@@ -26,9 +26,9 @@ namespace Qosmetics.Core
     [System.Serializable]
     public class Descriptor
     {
-        public string objectName;
-        public string author;
-        public string description;
+        public string objectName = "";
+        public string author = "";
+        public string description = "";
     }
 
     [System.Serializable]

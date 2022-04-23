@@ -139,7 +139,6 @@ namespace Qosmetics.Notes
 
         public void OnExport()
         {
-            Destroy(this);
         }
     }
     

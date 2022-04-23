@@ -50,7 +50,10 @@ public class WhackerEditor : Editor
         }
         else
         {
-            EditorGUILayout.LabelField("Your whacker is improperly made! (check trails)", GUI.skin.button);
+            EditorGUILayout.LabelField("Your whacker is improperly made!", GUI.skin.button);
+            EditorGUILayout.LabelField("Check if there is a LeftSaber and RightSaber");
+            EditorGUILayout.LabelField("Other than that check if all trails have a material");
+
         }
 
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);

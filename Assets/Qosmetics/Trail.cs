@@ -74,17 +74,26 @@ namespace Qosmetics.Sabers
         public int Length { get => data.length; set => data.length = value; }
         public float WhiteStep { get => data.whiteStep; set => data.whiteStep = value; }
 
+        public Material trailMaterial = null;
+
         public Transform topTransform = null;
         public Transform bottomTransform = null;
 
         public bool ValidateTrail()
         {
-            return topTransform != null && bottomTransform != null;
+            return topTransform != null && bottomTransform != null && trailMaterial != null;
         }
         public void OnExport(int trailId)
         {
             TrailID = trailId;
             SerializeToTextComponent();
+            var renderer = gameObject.GetComponent<MeshRenderer>();
+            if (renderer == null)
+            {
+                renderer = gameObject.AddComponent<MeshRenderer>();
+                renderer.sharedMaterial = trailMaterial;
+            }
+
             DestroyImmediate(this);
         }
 

@@ -11,9 +11,10 @@ public class TrailEditor : Editor
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
-        Qosmetics.Sabers.Trail trail= target as Qosmetics.Sabers.Trail;
+        Qosmetics.Sabers.Trail trail = target as Qosmetics.Sabers.Trail;
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
         trailSettingsOpened = EditorGUILayout.Foldout(trailSettingsOpened, "Trail Settings");
+        
         if (trailSettingsOpened)
         {
             EditorGUILayout.BeginHorizontal();
@@ -21,8 +22,9 @@ public class TrailEditor : Editor
             trail.topTransform = EditorGUILayout.ObjectField("Top", trail.topTransform, typeof(Transform), true) as Transform;
             trail.bottomTransform = EditorGUILayout.ObjectField("Bottom", trail.bottomTransform, typeof(Transform), true) as Transform;
             trail.Colortype = (Qosmetics.Sabers.Trail.ColorType)EditorGUILayout.EnumPopup("ColorType", trail.Colortype);
+            trail.trailMaterial = EditorGUILayout.ObjectField("Material", trail.trailMaterial, typeof(Material), false) as Material;
             if (trail.Colortype == Qosmetics.Sabers.Trail.ColorType.Custom)
-            trail.TrailColor = EditorGUILayout.ColorField("Trail Color", trail.TrailColor);
+                trail.TrailColor = EditorGUILayout.ColorField("Trail Color", trail.TrailColor);
             trail.MultiplierColor = EditorGUILayout.ColorField("Multiplier Color", trail.MultiplierColor);
             trail.Length = EditorGUILayout.IntField("Trail Length", trail.Length);
             trail.WhiteStep = EditorGUILayout.Slider("Whitestep", trail.WhiteStep, 0.0f, 1.0f);
