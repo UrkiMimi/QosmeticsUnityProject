@@ -123,5 +123,17 @@ namespace Qosmetics.Core
                 root.GetChild(i).CompletelyUnpackPrefab();
             }
         }
+
+        public static bool ShouldCC(this Material mat)
+        {
+            if (!mat) return false;
+            else if (mat.HasProperty("_CustomColors"))
+                return mat.GetFloat("_CustomColors") > 0;
+            else if (mat.HasProperty("_Glow"))
+                return mat.GetFloat("_Glow") > 0;
+            else if (mat.HasProperty("_Bloom"))
+                return mat.GetFloat("_Bloom") > 0;
+            return false;
+        }
     }
 }

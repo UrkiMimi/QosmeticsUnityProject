@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System.Diagnostics;
 
 [CustomEditor(typeof(Qosmetics.Notes.Cyoob))]
 public class CyoobEditor : Editor
@@ -10,8 +11,14 @@ public class CyoobEditor : Editor
     public static string Extension { get => "cyoob"; }
     bool packageSettingsOpened = true;
     bool objectSettingsOpened = true;
+    QosmeticsProjectSettings _projectSettings = null;
     public override void OnInspectorGUI()
     {
+        if (!_projectSettings)
+        {
+            _projectSettings = QosmeticsProjectSettings.GetOrCreateSettings();
+        }
+
         serializedObject.Update();
         Qosmetics.Notes.Cyoob cyoob = target as Qosmetics.Notes.Cyoob;
 
@@ -40,8 +47,14 @@ public class CyoobEditor : Editor
         {
             if (GUILayout.Button($"Export {cyoob.GetType().Name}"))
             {
-                string path = EditorUtility.SaveFilePanel($"Save {Extension} file", "", $"{cyoob.ObjectName}.{Extension}" , Extension);
-                if (path != "") Qosmetics.Core.ExporterUtils.ExportAsPrefabPackage(cyoob.gameObject, $"_{cyoob.GetType().Name}", path);
+                Export(cyoob);
+            }
+
+            if (_projectSettings.AllowPushToQuest && _projectSettings.IsAdbValid() && GUILayout.Button($"Push {cyoob.GetType().Name} To Quest"))
+            {
+                string path = Export(cyoob);
+                if (!string.IsNullOrEmpty(path))
+                Qosmetics.Core.AdbUtils.Push(path, $"/sdcard/ModData/com.beatgames.beatsaber/Qosmetics/Cyoobs/{Path.GetFileName(path)}");
             }
         }
         else
@@ -52,5 +65,17 @@ public class CyoobEditor : Editor
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
         GUILayout.EndVertical();
+    }
+
+    string Export(Qosmetics.Notes.Cyoob cyoob)
+    {
+        string exportName = _projectSettings.ExportFileName;
+        exportName = exportName.Replace("{ObjectName}", cyoob.ObjectName);
+        exportName = exportName.Replace("{ObjectAuthor}", cyoob.Author);
+        exportName = exportName.Replace("{Extension}", Extension);
+
+        string path = EditorUtility.SaveFilePanel($"Save {Extension} file", "", exportName, Extension);
+        if (!string.IsNullOrEmpty(path)) Qosmetics.Core.ExporterUtils.ExportAsPrefabPackage(cyoob.gameObject, $"_{cyoob.GetType().Name}", path);
+        return path;
     }
 }

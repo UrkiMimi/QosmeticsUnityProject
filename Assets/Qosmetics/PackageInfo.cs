@@ -14,7 +14,7 @@ namespace Qosmetics.Core
     {
         public string androidFileName = "_android";
         public string pcFileName = "_pc";
-        public Descriptor descriptor;
+        public Descriptor descriptor = new Descriptor();
         public Config config;
 
         public string ToJson()

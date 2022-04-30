@@ -10,9 +10,14 @@ public class BoxEditor : Editor
     public static string Extension { get => "box"; }
     bool packageSettingsOpened = true;
     bool objectSettingsOpened = true;
-
+    QosmeticsProjectSettings _projectSettings = null;
     public override void OnInspectorGUI()
     {
+        if (!_projectSettings)
+        {
+            _projectSettings = QosmeticsProjectSettings.GetOrCreateSettings();
+        }
+
         serializedObject.Update();
         Qosmetics.Walls.Box box = target as Qosmetics.Walls.Box;
 
@@ -51,7 +56,12 @@ public class BoxEditor : Editor
         {
             if (GUILayout.Button($"Export {box.GetType().Name}"))
             {
-                string path = EditorUtility.SaveFilePanel($"Save {Extension} file", "", $"{box.ObjectName}.{Extension}", Extension);
+                string exportName = _projectSettings.ExportFileName;
+                exportName = exportName.Replace("{ObjectName}", box.ObjectName);
+                exportName = exportName.Replace("{ObjectAuthor}", box.Author);
+                exportName = exportName.Replace("{Extension}", Extension);
+
+                string path = EditorUtility.SaveFilePanel($"Save {Extension} file", "", exportName, Extension);
                 if (path != "") Qosmetics.Core.ExporterUtils.ExportAsPrefabPackage(box.gameObject, $"_{box.GetType().Name}", path);
             }
         }

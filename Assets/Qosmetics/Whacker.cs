@@ -9,6 +9,7 @@ namespace Qosmetics.Sabers
     {
         [SerializeField]
         private PackageInfo packageJson = new PackageInfo();
+
         [SerializeField]
         private Qosmetics.Sabers.Config config = new Qosmetics.Sabers.Config();
         public string ObjectName

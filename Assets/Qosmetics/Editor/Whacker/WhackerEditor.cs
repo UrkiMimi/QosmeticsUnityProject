@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System.Diagnostics;
 
 [CustomEditor(typeof(Qosmetics.Sabers.Whacker))]
 public class WhackerEditor : Editor
@@ -10,9 +11,14 @@ public class WhackerEditor : Editor
     public static string Extension { get => "whacker"; }
     bool packageSettingsOpened = true;
     bool objectSettingsOpened = true;
-
+    QosmeticsProjectSettings _projectSettings = null;
     public override void OnInspectorGUI()
     {
+        if (!_projectSettings)
+        {
+            _projectSettings = QosmeticsProjectSettings.GetOrCreateSettings();
+        }
+
         serializedObject.Update();
         Qosmetics.Sabers.Whacker whacker = target as Qosmetics.Sabers.Whacker;
 
@@ -44,7 +50,12 @@ public class WhackerEditor : Editor
         {
             if (GUILayout.Button($"Export {whacker.GetType().Name}"))
             {
-                string path = EditorUtility.SaveFilePanel($"Save {Extension} file", "", $"{whacker.ObjectName}.{Extension}", Extension);
+                string exportName = _projectSettings.ExportFileName;
+                exportName = exportName.Replace("{ObjectName}", whacker.ObjectName);
+                exportName = exportName.Replace("{ObjectAuthor}", whacker.Author);
+                exportName = exportName.Replace("{Extension}", Extension);
+
+                string path = EditorUtility.SaveFilePanel($"Save {Extension} file", "", exportName, Extension);
                 if (path != "") Qosmetics.Core.ExporterUtils.ExportAsPrefabPackage(whacker.gameObject, $"_{whacker.GetType().Name}", path);
             }
         }
