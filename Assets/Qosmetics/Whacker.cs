@@ -48,7 +48,7 @@ namespace Qosmetics.Sabers
 
         [SerializeField]
         Transform rightSaber = null;
-        public bool ValidateObject()
+        public string ValidateObject()
         {
             // TODO
             var trails = GetComponentsInChildren<Trail>(true);
@@ -56,16 +56,21 @@ namespace Qosmetics.Sabers
             
             foreach (var trail in trails)
             {
-                if (!trail.ValidateTrail())
+                string validationString = trail.ValidateTrail();
+                if (!string.IsNullOrEmpty(validationString))
                 {
-                    return false;
+                    return validationString;
                 }
             }
 
             leftSaber = transform.Find("LeftSaber");
             rightSaber = transform.Find("RightSaber");
 
-            return leftSaber != null && rightSaber != null;
+            if (leftSaber == null)
+                return "LeftSaber was not found in the prefab";
+            if (rightSaber == null)
+                return "RightSaber was not found in the prefab";
+            return "";
         }
 
         public void OnExport()

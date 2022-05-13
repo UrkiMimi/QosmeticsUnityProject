@@ -37,7 +37,7 @@ namespace Qosmetics.Core
                         AssetDatabase.CreateAsset(theme, filename);
                         AssetDatabase.SaveAssets();
                     }
-                    catch (Exception _){ }
+                    catch (Exception){ }
                 }
                 _instance = theme;
             }

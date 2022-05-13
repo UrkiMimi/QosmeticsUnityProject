@@ -41,12 +41,11 @@ public class WhackerEditor : Editor
         objectSettingsOpened = EditorGUILayout.Foldout(objectSettingsOpened, "Object Settings");
         if (objectSettingsOpened)
         {
-            whacker.ShowArrows = EditorGUILayout.ToggleLeft("Use Base Game Arrows", whacker.ShowArrows);
         }
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
         */
-
-        if (whacker.ValidateObject())
+        string validationString = whacker.ValidateObject();
+        if (string.IsNullOrWhiteSpace(validationString))
         {
             if (GUILayout.Button($"Export {whacker.GetType().Name}"))
             {
@@ -62,9 +61,7 @@ public class WhackerEditor : Editor
         else
         {
             EditorGUILayout.LabelField("Your whacker is improperly made!", GUI.skin.button);
-            EditorGUILayout.LabelField("Check if there is a LeftSaber and RightSaber");
-            EditorGUILayout.LabelField("Other than that check if all trails have a material");
-
+            EditorGUILayout.LabelField(validationString, GUI.skin.button);
         }
 
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);

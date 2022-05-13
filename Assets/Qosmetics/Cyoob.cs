@@ -71,7 +71,7 @@ namespace Qosmetics.Notes
         [SerializeField]
         private GameObject rightLink;
 
-        public bool ValidateObject()
+        public string ValidateObject()
         {
             leftArrow = transform.Find("Notes/LeftArrow")?.gameObject;
             rightArrow = transform.Find("Notes/RightArrow")?.gameObject;
@@ -101,10 +101,14 @@ namespace Qosmetics.Notes
 
             List<MeshRenderer> meshRenderers = new List<MeshRenderer> {};
 
-            meshRenderers.AddRange(leftArrow.GetComponentsInChildren<MeshRenderer>(true));
-            meshRenderers.AddRange(rightArrow.GetComponentsInChildren<MeshRenderer>(true));
-            meshRenderers.AddRange(leftDot.GetComponentsInChildren<MeshRenderer>(true));
-            meshRenderers.AddRange(rightDot.GetComponentsInChildren<MeshRenderer>(true));
+            if (leftArrow != null)  
+                meshRenderers.AddRange(leftArrow.GetComponentsInChildren<MeshRenderer>(true));
+            if (rightArrow != null) 
+                meshRenderers.AddRange(rightArrow.GetComponentsInChildren<MeshRenderer>(true));
+            if (leftDot != null)    
+                meshRenderers.AddRange(leftDot.GetComponentsInChildren<MeshRenderer>(true));
+            if (rightDot != null) 
+                meshRenderers.AddRange(rightDot.GetComponentsInChildren<MeshRenderer>(true));
 
             if (bomb != null)
                 meshRenderers.AddRange(bomb.GetComponentsInChildren<MeshRenderer>(true));
@@ -134,7 +138,15 @@ namespace Qosmetics.Notes
                 }
                 if (!config.isMirrorable) break;
             }
-            return leftArrow != null && rightArrow != null && leftDot != null && rightDot != null;
+            if (leftArrow == null)
+                return "LeftArrow does not exist within the Notes object!";
+            if (rightArrow == null)
+                return "RightArrow does not exist within the Notes object!";
+            if (leftDot == null)
+                return "LeftDot does not exist within the Notes object!";
+            if (rightDot == null)
+                return "RightDot does not exist within the Notes object!";
+            return "";
         }
 
         public void OnExport()

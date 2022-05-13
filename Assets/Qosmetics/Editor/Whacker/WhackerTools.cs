@@ -55,7 +55,11 @@ namespace Qosmetics.Sabers
         public void OnFocus()
         {
             _projectSettings = QosmeticsProjectSettings.GetOrCreateSettings();
+            _theme = Theme.GetTheme();
+        }
 
+        public void GetSelectedWhacker()
+        {
             if (Selection.activeGameObject)
             {
                 selectedWhacker = Selection.activeGameObject.GetComponent<Whacker>();
@@ -64,14 +68,14 @@ namespace Qosmetics.Sabers
             {
                 selectedWhacker = null;
             }
-
-            _theme = Theme.GetTheme();
         }
 
         public void OnGUI()
         {
+            GetSelectedWhacker();
+
             GUILayout.Space(10);
-            
+
             _scrollPos = GUILayout.BeginScrollView(_scrollPos);
 
             UITools.BeginSection(_theme.BackgroundColor);

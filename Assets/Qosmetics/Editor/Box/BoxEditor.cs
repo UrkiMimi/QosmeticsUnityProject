@@ -51,7 +51,6 @@ public class BoxEditor : Editor
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
         string validationString = box.ValidateObject();
-
         if (string.IsNullOrEmpty(validationString))
         {
             if (GUILayout.Button($"Export {box.GetType().Name}"))

@@ -43,7 +43,8 @@ public class CyoobEditor : Editor
         }
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
-        if (cyoob.ValidateObject())
+        string validationString = cyoob.ValidateObject();
+        if (string.IsNullOrEmpty(validationString))
         {
             if (GUILayout.Button($"Export {cyoob.GetType().Name}"))
             {
@@ -59,7 +60,8 @@ public class CyoobEditor : Editor
         }
         else
         {
-            EditorGUILayout.LabelField("You're missing the arrow & dot Cyoobs!", GUI.skin.button);
+            EditorGUILayout.LabelField("Your cyoob is improperly made!", GUI.skin.button);
+            EditorGUILayout.LabelField(validationString, GUI.skin.button);
         }
 
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);

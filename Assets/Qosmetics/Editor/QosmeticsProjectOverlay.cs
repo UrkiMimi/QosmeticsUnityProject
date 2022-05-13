@@ -112,20 +112,23 @@ public class QosmeticsProjectOverlay
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal("box");
+
         if (GUILayout.Button("Whackers"))
         {
             OpenScene(_settings.WhackerScenePath);
             Qosmetics.Sabers.WhackerTools.OpenSaberTools();
         }
+
         if (GUILayout.Button("Cyoobs"))
         {
             OpenScene(_settings.CyoobScenePath);
+            Qosmetics.Notes.CyoobTools.OpenNoteTools();
         }
+
         if (GUILayout.Button("Boxes"))
         {
             OpenScene(_settings.BoxScenePath);
         }
-
         GUILayout.EndHorizontal();
 
     }

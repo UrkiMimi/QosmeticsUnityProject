@@ -44,7 +44,7 @@ namespace Qosmetics.Core
                 EditorSceneManager.SaveScene(toExport.scene);
 
                 PrefabUtility.SaveAsPrefabAsset(toExport, $"Assets/Qosmetics/{prefabName}.prefab");
-                UnityEngine.Object.DestroyImmediate(toExport);
+                UnityEngine.Object.DestroyImmediate(toExport.gameObject);
 
                 AssetBundleBuild assetBundleBuild = default(AssetBundleBuild);
 
