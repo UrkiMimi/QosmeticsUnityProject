@@ -22,6 +22,7 @@ public class QosmeticsProjectOverlay
 
     private static void DrawGUI(SceneView sceneView)
     {
+        return;
         _currentSceneView = sceneView;
         var svEvent = Event.current;
 
@@ -122,7 +123,7 @@ public class QosmeticsProjectOverlay
         if (GUILayout.Button("Cyoobs"))
         {
             OpenScene(_settings.CyoobScenePath);
-            Qosmetics.Notes.CyoobTools.OpenNoteTools();
+            //Qosmetics.Notes.CyoobTools.OpenNoteTools();
         }
 
         if (GUILayout.Button("Boxes"))

@@ -64,6 +64,7 @@ namespace Qosmetics.Notes
 
         public void OnGUI()
         {
+            return;
             GetSelectedCyoob();
             GUILayout.Space(10);
 
@@ -165,6 +166,7 @@ namespace Qosmetics.Notes
         [DrawGizmo(GizmoType.Selected)]
         private static void DrawGizmos(Cyoob cyoob, GizmoType gizmoType)
         {
+            return;
             if (!instance || !instance.ShowCyoobGuides)
             {
                 return;
