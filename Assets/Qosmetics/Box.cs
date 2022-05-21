@@ -5,7 +5,7 @@ using UnityEngine;
 using Qosmetics.Core;
 
 namespace Qosmetics.Walls
-{ 
+{
     public class Box : MonoBehaviour, IExportable
     {
         [SerializeField]
@@ -43,6 +43,12 @@ namespace Qosmetics.Walls
             }
         }
 
+        public Texture2D Thumbnail
+        {
+            get => thumbnail;
+            set => thumbnail = value;
+        }
+
         public bool replaceCoreMaterial { get => config.replaceCoreMaterial; set => config.replaceCoreMaterial = value; }
         public bool replaceFrameMaterial { get => config.replaceFrameMaterial; set => config.replaceFrameMaterial = value; }
         public bool replaceCoreMesh { get => config.replaceCoreMesh; set => config.replaceCoreMesh = value; }
@@ -51,8 +57,13 @@ namespace Qosmetics.Walls
         public bool disableFrame { get => config.disableFrame; set => config.disableFrame = value; }
         public bool disableFakeGlow { get => config.disableFakeGlow; set => config.disableFakeGlow = value; }
 
+        [SerializeField]
         Transform core = null;
+        [SerializeField]
         Transform frame = null;
+
+        [SerializeField]
+        public Texture2D thumbnail;
 
         public string ValidateObject()
         {
@@ -81,7 +92,7 @@ namespace Qosmetics.Walls
             if (config.replaceFrameMesh && (frameFilter == null || frameFilter.sharedMesh == null))
                 return "can't replace frame mesh if you have no meshfilter or no mesh on the meshfilter!";
 
-            List<MeshRenderer> meshRenderers = new List<MeshRenderer> {};
+            List<MeshRenderer> meshRenderers = new List<MeshRenderer> { };
 
             if (core != null) meshRenderers.AddRange(core.gameObject.GetComponentsInChildren<MeshRenderer>(true));
             if (frame != null) meshRenderers.AddRange(frame.gameObject.GetComponentsInChildren<MeshRenderer>(true));
@@ -109,6 +120,8 @@ namespace Qosmetics.Walls
 
         public void OnExport()
         {
+            var SizeParams = GetComponent<sizeParamsScript>();
+            if (SizeParams) Object.DestroyImmediate(SizeParams);
         }
     }
 

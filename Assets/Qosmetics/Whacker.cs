@@ -34,6 +34,11 @@ namespace Qosmetics.Sabers
             set => packageJson.descriptor.description = value;
         }
 
+        public Texture2D Thumbnail {
+            get => thumbnail;
+            set => thumbnail = value;
+        }
+
         public PackageInfo PackageJson
         {
             get
@@ -48,6 +53,9 @@ namespace Qosmetics.Sabers
 
         [SerializeField]
         Transform rightSaber = null;
+
+        [SerializeField]
+        Texture2D thumbnail = null;
         public string ValidateObject()
         {
             // TODO

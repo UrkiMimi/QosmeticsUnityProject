@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Diagnostics;
+using Qosmetics.Core;
 
 [CustomEditor(typeof(Qosmetics.Notes.Cyoob))]
 public class CyoobEditor : Editor
@@ -11,6 +12,7 @@ public class CyoobEditor : Editor
     public static string Extension { get => "cyoob"; }
     bool packageSettingsOpened = true;
     bool objectSettingsOpened = true;
+    bool thumbnailSettingsOpened = true;
     QosmeticsProjectSettings _projectSettings = null;
     public override void OnInspectorGUI()
     {
@@ -43,6 +45,27 @@ public class CyoobEditor : Editor
         }
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
+        thumbnailSettingsOpened = EditorGUILayout.Foldout(thumbnailSettingsOpened, "Thumbnail Selection");
+        if (thumbnailSettingsOpened)
+        {
+            EditorGUILayout.BeginVertical("box");
+            if (GUILayout.Button("Generate Thumbnail"))
+            {
+                var path = ExporterUtils.GenerateThumbnail();
+                if (string.IsNullOrEmpty(path))
+                {
+                    EditorUtility.DisplayDialog("Thumbnail Generation failed", "Failed to properly generate thumbnail", "OK");
+                }
+                else
+                    cyoob.Thumbnail = AssetDatabase.LoadMainAssetAtPath(path) as Texture2D;
+            }
+
+            cyoob.Thumbnail = EditorGUILayout.ObjectField("Thumbnail", cyoob.Thumbnail, typeof(Texture2D), false) as Texture2D;
+            EditorGUILayout.EndVertical();
+        }
+
+        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+
         string validationString = cyoob.ValidateObject();
         if (string.IsNullOrEmpty(validationString))
         {
@@ -55,7 +78,7 @@ public class CyoobEditor : Editor
             {
                 string path = Export(cyoob);
                 if (!string.IsNullOrEmpty(path))
-                Qosmetics.Core.AdbUtils.Push(path, $"/sdcard/ModData/com.beatgames.beatsaber/Qosmetics/Cyoobs/{Path.GetFileName(path)}");
+                    Qosmetics.Core.AdbUtils.Push(path, $"/sdcard/ModData/com.beatgames.beatsaber/Mods/Qosmetics/Cyoobs/{Path.GetFileName(path)}");
             }
         }
         else
@@ -77,7 +100,7 @@ public class CyoobEditor : Editor
         exportName = exportName.Replace("{Extension}", Extension);
 
         string path = EditorUtility.SaveFilePanel($"Save {Extension} file", "", exportName, Extension);
-        if (!string.IsNullOrEmpty(path)) Qosmetics.Core.ExporterUtils.ExportAsPrefabPackage(cyoob.gameObject, $"_{cyoob.GetType().Name}", path);
+        if (!string.IsNullOrEmpty(path)) Qosmetics.Core.ExporterUtils.ExportAsPrefabPackage(cyoob.gameObject, $"_{cyoob.GetType().Name}", path, cyoob.Thumbnail);
         return path;
     }
 }

@@ -2,6 +2,9 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.SceneManagement;
+using Qosmetics.Sabers;
+using Qosmetics.Notes;
+using Qosmetics.Walls;
 
 [InitializeOnLoad]
 public class QosmeticsProjectOverlay
@@ -22,7 +25,6 @@ public class QosmeticsProjectOverlay
 
     private static void DrawGUI(SceneView sceneView)
     {
-        return;
         _currentSceneView = sceneView;
         var svEvent = Event.current;
 
@@ -117,18 +119,19 @@ public class QosmeticsProjectOverlay
         if (GUILayout.Button("Whackers"))
         {
             OpenScene(_settings.WhackerScenePath);
-            Qosmetics.Sabers.WhackerTools.OpenSaberTools();
+            WhackerTools.OpenSaberTools();
         }
 
         if (GUILayout.Button("Cyoobs"))
         {
             OpenScene(_settings.CyoobScenePath);
-            //Qosmetics.Notes.CyoobTools.OpenNoteTools();
+            CyoobTools.OpenNoteTools();
         }
 
         if (GUILayout.Button("Boxes"))
         {
             OpenScene(_settings.BoxScenePath);
+            BoxTools.OpenWallTools();
         }
         GUILayout.EndHorizontal();
 

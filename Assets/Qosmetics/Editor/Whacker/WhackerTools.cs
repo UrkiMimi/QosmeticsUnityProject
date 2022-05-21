@@ -181,7 +181,7 @@ namespace Qosmetics.Sabers
             {
                 if (UITools.Button("Select All Renderers"))
                 {
-                    Selection.objects = SelectAllRenderers(Selection.activeGameObject).ToArray();
+                    Selection.objects = ExporterUtils.SelectAllRenderers(Selection.activeGameObject).ToArray();
                 }
 
                 GUILayout.Space(5);
@@ -386,16 +386,6 @@ namespace Qosmetics.Sabers
             trail.trailMaterial = _trailMaterial;
             trail.Length = _trailLength;
             trail.Colortype = colorType;
-        }
-
-        private List<GameObject> SelectAllRenderers(GameObject root)
-        {
-            var gos = new List<GameObject>();
-            foreach (var meshRenderer in root.GetComponentsInChildren<Renderer>())
-            {
-                gos.Add(meshRenderer.gameObject);
-            }
-            return gos;
         }
 
         private void SelectTrailTransform(GameObject root, bool top)

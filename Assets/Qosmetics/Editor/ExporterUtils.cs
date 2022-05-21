@@ -21,7 +21,7 @@ namespace Qosmetics.Core
         /// <param name="gameObject"></param> the gameobject to turn into a prefab
         /// <param name="prefabName"></param> the name of the prefab in the asset bundle
         /// <param name="path"></param> the path to which to export this to
-        public static void ExportAsPrefabPackage(this GameObject gameObject, string prefabName, string path)
+        public static void ExportAsPrefabPackage(this GameObject gameObject, string prefabName, string path, Texture2D thumbnail = null)
         {
             if (exporting) return;
             exporting = true;
@@ -33,7 +33,7 @@ namespace Qosmetics.Core
 
                 IExportable exportable = toExport.GetComponent<IExportable>();
                 PackageInfo packageJson = exportable.PackageJson;
-                
+
                 string androidFileName = packageJson.androidFileName;
                 string pcFileName = packageJson.pcFileName;
                 exportable.OnExport();
@@ -56,19 +56,29 @@ namespace Qosmetics.Core
                 Directory.CreateDirectory(WorkingDir);
                 Export(assetBundleBuild, $"{WorkingDir}/{pcFileName}", BuildTarget.StandaloneWindows64);
                 Export(assetBundleBuild, $"{WorkingDir}/{androidFileName}", BuildTarget.Android);
-
                 File.WriteAllText($"{WorkingDir}/package.json", packageJson.ToJson());
 
-                string[] files =
+                List<string> files = new List<string>()
                 {
-                $"{WorkingDir}/{pcFileName}",
-                $"{WorkingDir}/{androidFileName}",
-                $"{WorkingDir}/package.json"
+                    $"{WorkingDir}/{pcFileName}",
+                    $"{WorkingDir}/{androidFileName}",
+                    $"{WorkingDir}/package.json"
                 };
+
+                // if thumbnail given, add it to the files
+                if (thumbnail)
+                {
+                    var assetPath = AssetDatabase.GetAssetPath(thumbnail);
+                    if (string.IsNullOrEmpty(assetPath))
+                        File.WriteAllBytes($"{WorkingDir}/thumbnail.png", thumbnail.EncodeToPNG());
+                    else
+                        File.Copy(Application.dataPath + assetPath.Substring(6), $"{WorkingDir}/thumbnail.png");
+                    files.Add($"{WorkingDir}/thumbnail.png");
+                }
 
                 if (File.Exists($"{WorkingDir}/tempzip.zip"))
                     File.Delete($"{WorkingDir}/tempzip.zip");
-                CreateZipFile($"{WorkingDir}/tempzip.zip", files);
+                CreateZipFile($"{WorkingDir}/tempzip.zip", files.ToArray());
 
                 if (File.Exists(path)) File.Delete(path);
 
@@ -97,7 +107,7 @@ namespace Qosmetics.Core
         static void Export(AssetBundleBuild assetBundleBuild, string path, BuildTarget target)
         {
             assetBundleBuild.assetBundleName = Path.GetFileName(path);
-            BuildPipeline.BuildAssetBundles(Path.GetDirectoryName(path), new AssetBundleBuild[] { assetBundleBuild}, 0, target);
+            BuildPipeline.BuildAssetBundles(Path.GetDirectoryName(path), new AssetBundleBuild[] { assetBundleBuild }, 0, target);
         }
 
         public static void CreateZipFile(string fileName, IEnumerable<string> files)
@@ -135,5 +145,67 @@ namespace Qosmetics.Core
                 return mat.GetFloat("_Bloom") > 0;
             return false;
         }
+
+        public static List<GameObject> SelectAllRenderers(GameObject root)
+        {
+            var gos = new List<GameObject>();
+            if (root)
+            {
+                foreach (var meshRenderer in root.GetComponentsInChildren<Renderer>(true)) gos.Add(meshRenderer.gameObject);
+            }
+            return gos;
+        }
+
+        public static void DetectMirrorable(GameObject root)
+        {
+            if (root)
+            {
+                var renderers = root.gameObject.GetComponentsInChildren<MeshRenderer>();
+                Material badMaterial = null;
+                foreach (var renderer in renderers)
+                {
+                    foreach (var material in renderer.sharedMaterials)
+                    {
+                        if (material == null) continue;
+                        if (!material.HasProperty("_Alpha")) badMaterial = material;
+                        if (!material.HasProperty("_StencilRefID")) badMaterial = material;
+                        if (!material.HasProperty("_StencilComp")) badMaterial = material;
+                        if (!material.HasProperty("_StencilOp")) badMaterial = material;
+                        if (!material.HasProperty("_BlendSrcFactor")) badMaterial = material;
+                        if (!material.HasProperty("_BlendDstFactor")) badMaterial = material;
+                        if (!material.HasProperty("_BlendSrcFactorA")) badMaterial = material;
+                        if (!material.HasProperty("_BlendDstFactorA")) badMaterial = material;
+                        // if we find a bad material, break
+                        if (badMaterial) break;
+                    }
+                }
+
+                if (!badMaterial)
+                    EditorUtility.DisplayDialog("Object mirrorable", "This object was mirrorable!", "OK");
+                else
+                    EditorUtility.DisplayDialog("Object not mirrorable", $"This object is not (fully) mirrorable!, material {AssetDatabase.GetAssetPath(badMaterial)} is missing the correct properties", "OK");
+            }
+            else
+            {
+                EditorUtility.DisplayDialog("Nothing selected", "You do not have anything selected that has a qosmetics component on the object or it's parents, can't verify mirrorability.", "OK");
+            }
+        }
+
+        public static string GenerateThumbnail()
+        {
+            var cam = Qosmetics.Core.ThumbnailCamera.Instance;
+            var path = EditorUtility.SaveFilePanel("Save thumbnail", Application.dataPath, "thumbnail.png", "png");
+            if (string.IsNullOrEmpty(path) || !path.Contains(Application.dataPath))
+                return "";
+
+            var thumbnail = cam.Generate();
+
+            var data = thumbnail.EncodeToPNG();
+            File.WriteAllBytes(path, data);
+            AssetDatabase.Refresh();
+
+            return path.Substring(Application.dataPath.Length - 6);
+        }
+
     }
 }

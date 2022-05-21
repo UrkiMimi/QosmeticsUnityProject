@@ -11,13 +11,16 @@ namespace Qosmetics.Notes
         private PackageInfo packageJson = new PackageInfo();
         [SerializeField]
         private Qosmetics.Notes.Config config = new Qosmetics.Notes.Config();
-        public string ObjectName {
+        public string ObjectName
+        {
             get => packageJson.descriptor.objectName;
-            set {
+            set
+            {
                 packageJson.androidFileName = $"{value.ToLower()}_android";
                 packageJson.pcFileName = $"{value.ToLower()}_pc";
                 packageJson.descriptor.objectName = value;
-            } }
+            }
+        }
         public string Author
         {
             get => packageJson.descriptor.author;
@@ -39,43 +42,52 @@ namespace Qosmetics.Notes
             }
         }
 
+        public Texture2D Thumbnail
+        {
+            get => thumbnail;
+            set => thumbnail = value;
+        }
+
         public bool ShowArrows { get => config.showArrows; set => config.showArrows = value; }
         [SerializeField]
-        private GameObject leftArrow;
+        public GameObject leftArrow;
         [SerializeField]
-        private GameObject rightArrow;
+        public GameObject rightArrow;
         [SerializeField]
-        private GameObject leftDot;
+        public GameObject leftDot;
         [SerializeField]
-        private GameObject rightDot;
+        public GameObject rightDot;
         [SerializeField]
-        private GameObject bomb;
+        public GameObject bomb;
         [SerializeField]
-        private GameObject leftDebris;
+        public GameObject leftDebris;
         [SerializeField]
-        private GameObject rightDebris;
+        public GameObject rightDebris;
         [SerializeField]
-        private GameObject leftChainHeadDebris;
+        public GameObject leftChainHeadDebris;
         [SerializeField]
-        private GameObject rightChainHeadDebris;
+        public GameObject rightChainHeadDebris;
         [SerializeField]
-        private GameObject leftChainLinkDebris;
+        public GameObject leftChainLinkDebris;
         [SerializeField]
-        private GameObject rightChainLinkDebris;
+        public GameObject rightChainLinkDebris;
         [SerializeField]
-        private GameObject leftHead;
+        public GameObject leftHead;
         [SerializeField]
-        private GameObject rightHead;
+        public GameObject rightHead;
         [SerializeField]
-        private GameObject leftLink;
+        public GameObject leftLink;
         [SerializeField]
-        private GameObject rightLink;
+        public GameObject rightLink;
+
+        [SerializeField]
+        public Texture2D thumbnail;
 
         public string ValidateObject()
         {
             leftArrow = transform.Find("Notes/LeftArrow")?.gameObject;
             rightArrow = transform.Find("Notes/RightArrow")?.gameObject;
-            leftDot= transform.Find("Notes/LeftDot")?.gameObject;
+            leftDot = transform.Find("Notes/LeftDot")?.gameObject;
             rightDot = transform.Find("Notes/RightDot")?.gameObject;
 
             bomb = transform.Find("Bomb")?.gameObject;
@@ -90,7 +102,7 @@ namespace Qosmetics.Notes
             leftHead = transform.Find("Chains/LeftHead")?.gameObject;
             rightHead = transform.Find("Chains/RightHead")?.gameObject;
             leftLink = transform.Find("Chains/LeftLink")?.gameObject;
-            rightLink= transform.Find("Chains/RightLink")?.gameObject;
+            rightLink = transform.Find("Chains/RightLink")?.gameObject;
 
             config.hasBomb = bomb != null;
             config.hasDebris = leftDebris != null && rightDebris != null;
@@ -99,15 +111,15 @@ namespace Qosmetics.Notes
             config.hasChainLinkDebris = leftChainLinkDebris != null && rightChainLinkDebris != null;
             config.hasSlider = leftHead != null && rightHead != null && leftLink != null && rightLink != null;
 
-            List<MeshRenderer> meshRenderers = new List<MeshRenderer> {};
+            List<MeshRenderer> meshRenderers = new List<MeshRenderer> { };
 
-            if (leftArrow != null)  
+            if (leftArrow != null)
                 meshRenderers.AddRange(leftArrow.GetComponentsInChildren<MeshRenderer>(true));
-            if (rightArrow != null) 
+            if (rightArrow != null)
                 meshRenderers.AddRange(rightArrow.GetComponentsInChildren<MeshRenderer>(true));
-            if (leftDot != null)    
+            if (leftDot != null)
                 meshRenderers.AddRange(leftDot.GetComponentsInChildren<MeshRenderer>(true));
-            if (rightDot != null) 
+            if (rightDot != null)
                 meshRenderers.AddRange(rightDot.GetComponentsInChildren<MeshRenderer>(true));
 
             if (bomb != null)
@@ -153,7 +165,7 @@ namespace Qosmetics.Notes
         {
         }
     }
-    
+
     [System.Serializable]
     public class Config : Qosmetics.Core.Config
     {

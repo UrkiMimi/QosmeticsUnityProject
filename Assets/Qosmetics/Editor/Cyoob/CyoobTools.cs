@@ -26,7 +26,6 @@ namespace Qosmetics.Notes
 
         bool _isGuidesOpen = false;
         bool _isCreateSaberOpen = false;
-        bool _isFixingOpen = false;
         bool _isBeatSaberLookOpen = false;
         bool _isOtherToolsOpen = false;
 
@@ -36,6 +35,10 @@ namespace Qosmetics.Notes
         GameObject _bombTemplate = null;
         GameObject _headTemplate = null;
         GameObject _linkTemplate = null;
+
+        GameObject _debrisTemplate = null;
+        GameObject _linkDebrisTemplate = null;
+        GameObject _headDebrisTemplate = null;
 
         [MenuItem("Qosmetics/Cyoob Tools")]
         public static void OpenNoteTools()
@@ -64,7 +67,6 @@ namespace Qosmetics.Notes
 
         public void OnGUI()
         {
-            return;
             GetSelectedCyoob();
             GUILayout.Space(10);
 
@@ -101,6 +103,12 @@ namespace Qosmetics.Notes
                 _headTemplate = (GameObject)EditorGUILayout.ObjectField("Chain Head Prefab", _headTemplate, typeof(GameObject), false);
                 _linkTemplate = (GameObject)EditorGUILayout.ObjectField("Chain Link Prefab", _linkTemplate, typeof(GameObject), false);
                 GUILayout.EndVertical();
+                GUILayout.Label("Debris");
+                GUILayout.BeginVertical("box");
+                _debrisTemplate = (GameObject)EditorGUILayout.ObjectField("Debris Prefab", _debrisTemplate, typeof(GameObject), false);
+                if (_headTemplate != null) _headDebrisTemplate = (GameObject)EditorGUILayout.ObjectField("Chain Head Debris Prefab", _headDebrisTemplate, typeof(GameObject), false);
+                if (_linkTemplate != null) _linkDebrisTemplate = (GameObject)EditorGUILayout.ObjectField("Chain Link Debris Prefab", _linkDebrisTemplate, typeof(GameObject), false);
+                GUILayout.EndVertical();
                 GUILayout.Space(5);
                 if (GUILayout.Button("Create Template", GUILayout.Height(20)))
                 {
@@ -108,7 +116,7 @@ namespace Qosmetics.Notes
                 }
             }
             UITools.EndSection();
-
+            /*
             UITools.BeginSection(_theme.BackgroundColor);
             UITools.CenterHeader("Fixing", _theme.HeaderColor);
             UITools.Foldout(ref _isFixingOpen);
@@ -120,7 +128,7 @@ namespace Qosmetics.Notes
                 }
             }
             UITools.EndSection();
-
+            */
             UITools.BeginSection(_theme.BackgroundColor);
             UITools.CenterHeader("Beat Saber Look", _theme.HeaderColor);
             UITools.Foldout(ref _isBeatSaberLookOpen);
@@ -154,7 +162,22 @@ namespace Qosmetics.Notes
             {
                 if (UITools.Button("Select All Renderers"))
                 {
-                    Selection.objects = SelectAllRenderers(Selection.activeGameObject).ToArray();
+                    Selection.objects = ExporterUtils.SelectAllRenderers(Selection.activeGameObject).ToArray();
+                }
+
+                if (UITools.Button("Detect Mirrorable"))
+                {
+                    ExporterUtils.DetectMirrorable(_selectedCyoob?.gameObject);
+                }
+
+                if (UITools.Button("Layout Cyoob"))
+                {
+                    LayoutCyoobs();
+                }
+
+                if (UITools.Button("Zero out cyoob"))
+                {
+                    ReturnCyoobs();
                 }
             }
             UITools.EndSection();
@@ -163,10 +186,9 @@ namespace Qosmetics.Notes
             GUILayout.EndScrollView();
         }
 
-        [DrawGizmo(GizmoType.Selected)]
+        [DrawGizmo(GizmoType.Selected | GizmoType.NonSelected)]
         private static void DrawGizmos(Cyoob cyoob, GizmoType gizmoType)
         {
-            return;
             if (!instance || !instance.ShowCyoobGuides)
             {
                 return;
@@ -203,11 +225,16 @@ namespace Qosmetics.Notes
         }
 
 
+        static Color ColorLerp(Color a, Color b, float t)
+        {
+            return a * (1.0f - t) + b * t;
+        }
         static void DrawNotesGizmo(Transform t)
         {
             foreach (Transform child in t)
             {
                 Gizmos.color = child.name.StartsWith("Left") ? instance.CustomColorLeft : instance.CustomColorRight;
+                Gizmos.color = ColorLerp(Gizmos.color, Color.white, .5f);
                 Gizmos.DrawWireCube(child.position, Vector3.one * cyoobSize);
             }
         }
@@ -221,6 +248,7 @@ namespace Qosmetics.Notes
             foreach (Transform child in t)
             {
                 Gizmos.color = child.name.StartsWith("Left") ? instance.CustomColorLeft : instance.CustomColorRight;
+                Gizmos.color = ColorLerp(Gizmos.color, Color.white, .5f);
                 Gizmos.DrawWireCube(child.position, Vector3.one * cyoobSize);
             }
         }
@@ -229,6 +257,7 @@ namespace Qosmetics.Notes
             foreach (Transform child in t)
             {
                 Gizmos.color = child.name.StartsWith("Left") ? instance.CustomColorLeft : instance.CustomColorRight;
+                Gizmos.color = ColorLerp(Gizmos.color, Color.white, .5f);
                 if (child.name.EndsWith("Head"))
                     Gizmos.DrawWireCube(child.position, new Vector3(cyoobSize, 0.75f * cyoobSize, cyoobSize));
                 else
@@ -240,6 +269,7 @@ namespace Qosmetics.Notes
             foreach (Transform child in t)
             {
                 Gizmos.color = child.name.StartsWith("Left") ? instance.CustomColorLeft : instance.CustomColorRight;
+                Gizmos.color = ColorLerp(Gizmos.color, Color.white, .5f);
                 Gizmos.DrawWireCube(child.position, new Vector3(cyoobSize, 0.75f * cyoobSize, cyoobSize));
             }
         }
@@ -249,23 +279,100 @@ namespace Qosmetics.Notes
             foreach (Transform child in t)
             {
                 Gizmos.color = child.name.StartsWith("Left") ? instance.CustomColorLeft : instance.CustomColorRight;
+                Gizmos.color = ColorLerp(Gizmos.color, Color.white, .5f);
                 Gizmos.DrawWireCube(child.position, new Vector3(cyoobSize, 0.2f * cyoobSize, cyoobSize));
             }
         }
 
-        private List<GameObject> SelectAllRenderers(GameObject root)
+        GameObject AddPrefab(GameObject prefab, Transform parent, string name)
         {
-            var gos = new List<GameObject>();
-            foreach (var meshRenderer in root.GetComponentsInChildren<Renderer>())
-            {
-                gos.Add(meshRenderer.gameObject);
-            }
-            return gos;
+            var go = new GameObject(name);
+            go.transform.parent = parent;
+            return Object.Instantiate(prefab, parent, false);
         }
 
         public void CreateTemplate()
         {
-            Debug.LogError("TODO");
+            if (!_arrowTemplate)
+            {
+                Debug.LogError("Can't make template, Arrow Prefab was not given!");
+                return;
+            }
+
+            if (!_dotTemplate)
+            {
+                Debug.LogError("Can't make template, Dot Prefab was not given!");
+                return;
+            }
+
+            if (_headTemplate ^ _linkTemplate)
+            {
+                Debug.LogError("Can't make template, the chain head or link was not given!");
+                return;
+            }
+
+
+            var rootGo = new GameObject(_templateText);
+            var cyoob = rootGo.AddComponent<Cyoob>();
+            cyoob.ObjectName = _templateText;
+
+            var leftObjects = new List<GameObject>();
+            var rightObjects = new List<GameObject>();
+
+            if (_projectSettings)
+            {
+                cyoob.Author = _projectSettings.Author;
+            }
+
+            var notes = new GameObject("Notes");
+            notes.transform.parent = rootGo.transform;
+
+            leftObjects.Add(AddPrefab(_arrowTemplate, notes.transform, "LeftArrow"));
+            rightObjects.Add(AddPrefab(_arrowTemplate, notes.transform, "RightArrow"));
+
+            leftObjects.Add(AddPrefab(_dotTemplate, notes.transform, "LeftDot"));
+            rightObjects.Add(AddPrefab(_dotTemplate, notes.transform, "RightDot"));
+
+            if (_bombTemplate)
+                AddPrefab(_bombTemplate, rootGo.transform, "Bomb");
+
+            if (_headTemplate)
+            {
+                var chains = new GameObject("Chains");
+                chains.transform.parent = rootGo.transform;
+                leftObjects.Add(AddPrefab(_headTemplate, chains.transform, "LeftHead"));
+                rightObjects.Add(AddPrefab(_headTemplate, chains.transform, "RightHead"));
+
+                leftObjects.Add(AddPrefab(_linkTemplate, chains.transform, "LeftLink"));
+                rightObjects.Add(AddPrefab(_linkTemplate, chains.transform, "RightLink"));
+            }
+
+            if (_debrisTemplate)
+            {
+                var debris = new GameObject("Debris");
+                debris.transform.parent = rootGo.transform;
+                leftObjects.Add(AddPrefab(_debrisTemplate, debris.transform, "LeftDebris"));
+                rightObjects.Add(AddPrefab(_debrisTemplate, debris.transform, "RightDebris"));
+            }
+
+            if (_headTemplate && _headDebrisTemplate)
+            {
+                var debris = new GameObject("ChainHeadDebris");
+                debris.transform.parent = rootGo.transform;
+                leftObjects.Add(AddPrefab(_headDebrisTemplate, debris.transform, "LeftDebris"));
+                rightObjects.Add(AddPrefab(_headDebrisTemplate, debris.transform, "RightDebris"));
+            }
+
+            if (_linkTemplate && _linkDebrisTemplate)
+            {
+                var debris = new GameObject("ChainLinkDebris");
+                debris.transform.parent = rootGo.transform;
+                leftObjects.Add(AddPrefab(_linkDebrisTemplate, debris.transform, "LeftDebris"));
+                rightObjects.Add(AddPrefab(_linkDebrisTemplate, debris.transform, "RightDebris"));
+            }
+
+            foreach (var leftObject in leftObjects) SetCustomColors(leftObject, CustomColorLeft, CustomColorRight);
+            foreach (var rightObject in rightObjects) SetCustomColors(rightObject, CustomColorRight, CustomColorLeft);
         }
 
         public static Bounds GetObjectBounds(GameObject g)
@@ -273,10 +380,6 @@ namespace Qosmetics.Notes
             var b = new Bounds(g.transform.position, Vector3.zero);
             foreach (var r in g.GetComponentsInChildren<Renderer>()) b.Encapsulate(r.bounds);
             return b;
-        }
-        Vector3 Abs(Vector3 vec)
-        {
-            return new Vector3(Mathf.Abs(vec.x), Mathf.Abs(vec.y), Mathf.Abs(vec.z));
         }
 
         public void FixSize()
@@ -323,22 +426,41 @@ namespace Qosmetics.Notes
             var rightLinkDebris = cyoob.transform.Find("ChainLinkDebris/RightDebris")?.gameObject;
             if (rightLinkDebris) ClampSize(rightLinkDebris, new Vector3(cyoobSize, 0.2f * cyoobSize, cyoobSize));
         }
-
-        void ClampSize(GameObject obj, Vector3 target) 
+        bool RecursiveParentSearch(Transform child, Transform target)
         {
-            if (obj != Selection.activeGameObject)
+            if (child == null)
+                return false;
+            if (child == target)
+                return true;
+            return RecursiveParentSearch(child.parent, target);
+        }
+
+        void ClampSize(GameObject obj, Vector3 target)
+        {
+            if (!RecursiveParentSearch(Selection.activeTransform, obj.transform))
                 return;
-            var t = obj.transform;
-            var localToWorld = t.localToWorldMatrix;
-            var worldToLocal = t.worldToLocalMatrix;
+            Vector3 Abs(Vector3 vec)
+            {
+                return new Vector3(Mathf.Abs(vec.x), Mathf.Abs(vec.y), Mathf.Abs(vec.z));
+            }
+            var renderers = ExporterUtils.SelectAllRenderers(obj);
 
-            var ogScale = Abs(localToWorld.rotation * t.localScale);
-            t.localScale = Abs(worldToLocal.rotation * Vector3.one);
+            foreach (var renderer in renderers)
+            {
+                var t = renderer.transform;
+                var localToWorld = t.localToWorldMatrix;
+                var worldToLocal = t.worldToLocalMatrix;
 
-            var bounds = GetObjectBounds(obj).extents * 2;
-            ogScale = new Vector3(target.x / bounds.x, target.y / bounds.y, target.z / bounds.z);
-            t.localScale = Abs(worldToLocal.rotation * ogScale);
-        } 
+                var ogScale = Abs(localToWorld.rotation * t.localScale);
+                var actualBounds = GetObjectBounds(obj).extents * 2;
+                var largestFactor = Mathf.Max(actualBounds.x, actualBounds.y, actualBounds.z);
+
+                if (actualBounds.x > target.x || actualBounds.y > target.y || actualBounds.z > target.z)
+                {
+                    t.localScale = ogScale / largestFactor;
+                }
+            }
+        }
 
         public void ColorCyoob(Cyoob cyoob)
         {
@@ -379,18 +501,19 @@ namespace Qosmetics.Notes
             if (leftLinkDebris) leftObjects.Add(leftLinkDebris);
             var rightLinkDebris = cyoob.transform.Find("ChainLinkDebris/RightDebris")?.gameObject;
             if (rightLinkDebris) rightObjects.Add(rightLinkDebris);
-            
+
             foreach (var leftObject in leftObjects)
             {
                 SetCustomColors(leftObject, CustomColorLeft, CustomColorRight);
             }
-            
+
             foreach (var rightObject in rightObjects)
             {
                 SetCustomColors(rightObject, CustomColorRight, CustomColorLeft);
 
             }
         }
+
         private void SetCustomColors(GameObject parent, Color thisColor, Color thatColor)
         {
             var renderers = parent.GetComponentsInChildren<Renderer>(true);
@@ -410,6 +533,74 @@ namespace Qosmetics.Notes
                 }
             }
             Undo.IncrementCurrentGroup();
+        }
+
+        private void ReturnCyoobs()
+        {
+            var cyoob = _selectedCyoob;
+            if (!cyoob) return;
+
+            var valid = cyoob.ValidateObject();
+            if (string.IsNullOrEmpty(valid))
+            {
+                cyoob.leftArrow.transform.localPosition = Vector3.zero;
+                cyoob.leftDot.transform.localPosition = Vector3.zero;
+                cyoob.rightArrow.transform.localPosition = Vector3.zero;
+                cyoob.rightDot.transform.localPosition = Vector3.zero;
+
+                if (cyoob.leftHead) cyoob.leftHead.transform.localPosition = Vector3.zero;
+                if (cyoob.leftLink) cyoob.leftLink.transform.localPosition = Vector3.zero;
+                if (cyoob.rightHead) cyoob.rightHead.transform.localPosition = Vector3.zero;
+                if (cyoob.rightLink) cyoob.rightLink.transform.localPosition = Vector3.zero;
+
+                if (cyoob.bomb) cyoob.bomb.transform.localPosition = Vector3.zero;
+
+                if (cyoob.leftDebris) cyoob.leftDebris.transform.localPosition = Vector3.zero;
+                if (cyoob.rightDebris) cyoob.rightDebris.transform.localPosition = Vector3.zero;
+
+                if (cyoob.leftChainHeadDebris) cyoob.leftChainHeadDebris.transform.localPosition = Vector3.zero;
+                if (cyoob.rightChainHeadDebris) cyoob.rightChainHeadDebris.transform.localPosition = Vector3.zero;
+
+                if (cyoob.leftChainLinkDebris) cyoob.leftChainLinkDebris.transform.localPosition = Vector3.zero;
+                if (cyoob.rightChainLinkDebris) cyoob.rightChainLinkDebris.transform.localPosition = Vector3.zero;
+
+            }
+            else
+                EditorUtility.DisplayDialog("Return Cyoobs Failed", valid, "OK");
+        }
+        private void LayoutCyoobs()
+        {
+            var cyoob = _selectedCyoob;
+            if (!cyoob) return;
+
+            var valid = cyoob.ValidateObject();
+            if (string.IsNullOrEmpty(valid))
+            {
+                const float unit = 1.25f;
+                cyoob.leftArrow.transform.localPosition = new Vector3(0, unit, 0);
+                cyoob.leftDot.transform.localPosition = new Vector3(0, 0, 0);
+                cyoob.rightArrow.transform.localPosition = new Vector3(unit, unit, 0);
+                cyoob.rightDot.transform.localPosition = new Vector3(unit, 0, 0);
+
+                if (cyoob.leftHead) cyoob.leftHead.transform.localPosition = new Vector3(-unit * 2, unit, 0);
+                if (cyoob.leftLink) cyoob.leftLink.transform.localPosition = new Vector3(-unit * 2, 0, 0);
+                if (cyoob.rightHead) cyoob.rightHead.transform.localPosition = new Vector3(-unit, unit, 0);
+                if (cyoob.rightLink) cyoob.rightLink.transform.localPosition = new Vector3(-unit, 0, 0);
+
+                if (cyoob.bomb) cyoob.bomb.transform.localPosition = new Vector3(unit * 2, 0, 0);
+
+                if (cyoob.leftDebris) cyoob.leftDebris.transform.localPosition = new Vector3(0, -unit, 0);
+                if (cyoob.rightDebris) cyoob.rightDebris.transform.localPosition = new Vector3(unit, -unit, 0);
+
+                if (cyoob.leftChainHeadDebris) cyoob.leftChainHeadDebris.transform.localPosition = new Vector3(-unit * 2, -unit, 0);
+                if (cyoob.rightChainHeadDebris) cyoob.rightChainHeadDebris.transform.localPosition = new Vector3(-unit, -unit, 0);
+
+                if (cyoob.leftChainLinkDebris) cyoob.leftChainLinkDebris.transform.localPosition = new Vector3(-unit * 2, -unit * 2, 0);
+                if (cyoob.rightChainLinkDebris) cyoob.rightChainLinkDebris.transform.localPosition = new Vector3(-unit, -unit * 2, 0);
+
+            }
+            else
+                EditorUtility.DisplayDialog("Layout Cyoobs Failed", valid, "OK");
         }
     }
 }

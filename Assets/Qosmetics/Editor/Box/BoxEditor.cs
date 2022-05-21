@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-
+using Qosmetics.Core;
 [CustomEditor(typeof(Qosmetics.Walls.Box))]
 public class BoxEditor : Editor
 {
     public static string Extension { get => "box"; }
     bool packageSettingsOpened = true;
     bool objectSettingsOpened = true;
+    bool thumbnailSettingsOpened = true;
     QosmeticsProjectSettings _projectSettings = null;
     public override void OnInspectorGUI()
     {
@@ -49,19 +50,40 @@ public class BoxEditor : Editor
             box.disableFakeGlow = EditorGUILayout.ToggleLeft("Disable Fake Glow", box.disableFakeGlow);
         }
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+        thumbnailSettingsOpened = EditorGUILayout.Foldout(thumbnailSettingsOpened, "Thumbnail Selection");
+        if (thumbnailSettingsOpened)
+        {
+            EditorGUILayout.BeginVertical("box");
+            if (GUILayout.Button("Generate Thumbnail"))
+            {
+                var path = ExporterUtils.GenerateThumbnail();
+                if (string.IsNullOrEmpty(path))
+                {
+                    EditorUtility.DisplayDialog("Thumbnail Generation failed", "Failed to properly generate thumbnail", "OK");
+                }
+                else
+                    box.Thumbnail = AssetDatabase.LoadMainAssetAtPath(path) as Texture2D;
+            }
 
+            box.Thumbnail = EditorGUILayout.ObjectField("Thumbnail", box.Thumbnail, typeof(Texture2D), false) as Texture2D;
+            EditorGUILayout.EndVertical();
+        }
+
+        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
         string validationString = box.ValidateObject();
         if (string.IsNullOrEmpty(validationString))
         {
+
             if (GUILayout.Button($"Export {box.GetType().Name}"))
             {
-                string exportName = _projectSettings.ExportFileName;
-                exportName = exportName.Replace("{ObjectName}", box.ObjectName);
-                exportName = exportName.Replace("{ObjectAuthor}", box.Author);
-                exportName = exportName.Replace("{Extension}", Extension);
+                Export(box);
+            }
 
-                string path = EditorUtility.SaveFilePanel($"Save {Extension} file", "", exportName, Extension);
-                if (path != "") Qosmetics.Core.ExporterUtils.ExportAsPrefabPackage(box.gameObject, $"_{box.GetType().Name}", path);
+            if (_projectSettings.AllowPushToQuest && _projectSettings.IsAdbValid() && GUILayout.Button($"Push {box.GetType().Name} To Quest"))
+            {
+                string path = Export(box);
+                if (!string.IsNullOrEmpty(path))
+                    Qosmetics.Core.AdbUtils.Push(path, $"/sdcard/ModData/com.beatgames.beatsaber/Mods/Qosmetics/Boxes/{Path.GetFileName(path)}");
             }
         }
         else
@@ -73,5 +95,17 @@ public class BoxEditor : Editor
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
         GUILayout.EndVertical();
     }
-    
+
+    string Export(Qosmetics.Walls.Box box)
+    {
+        string exportName = _projectSettings.ExportFileName;
+        exportName = exportName.Replace("{ObjectName}", box.ObjectName);
+        exportName = exportName.Replace("{ObjectAuthor}", box.Author);
+        exportName = exportName.Replace("{Extension}", Extension);
+
+        string path = EditorUtility.SaveFilePanel($"Save {Extension} file", "", exportName, Extension);
+        if (!string.IsNullOrEmpty(path)) Qosmetics.Core.ExporterUtils.ExportAsPrefabPackage(box.gameObject, $"_{box.GetType().Name}", path, box.Thumbnail);
+        return path;
+    }
+
 }
