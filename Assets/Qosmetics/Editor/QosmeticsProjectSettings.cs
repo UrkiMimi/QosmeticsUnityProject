@@ -34,7 +34,9 @@ public class QosmeticsProjectSettings : ScriptableObject
         var settings = AssetDatabase.LoadAssetAtPath<QosmeticsProjectSettings>(SettingsPath);
         if (settings == null)
         {
-            Directory.CreateDirectory(Path.Combine(Application.dataPath, SettingsPath.Substring(7)));
+            string dirPath = Path.Combine(Application.dataPath, SettingsPath.Substring(7));
+            if (Directory.Exists(dirPath)) Directory.CreateDirectory(dirPath);
+            
             settings = CreateInstance<QosmeticsProjectSettings>();
             AssetDatabase.CreateAsset(settings, SettingsPath);
             AssetDatabase.SaveAssets();

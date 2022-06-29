@@ -10,7 +10,6 @@ public class WhackerEditor : Editor
     public static string Extension { get => "whacker"; }
     bool packageSettingsOpened = true;
     bool thumbnailSettingsOpened = true;
-    bool objectSettingsOpened = true;
     QosmeticsProjectSettings _projectSettings = null;
     public override void OnInspectorGUI()
     {
