@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c51e1d95b06d0684fadde057e74e1814, type: 3}
   m_Name: ProjectSettings
   m_EditorClassIdentifier: 
-  Author: RedBrumbler
+  Author: 
   ExportFileName: '{ObjectName}.{Extension}'
   ShowOverlay: 1
-  AllowPushToQuest: 1
+  AllowPushToQuest: 0
   Wireless: 0
   QuestIPAddress: 192.168.0.20
   AdbExecutable: adb.exe

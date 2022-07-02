@@ -51,6 +51,9 @@ public class QosmeticsProjectOverlay
         {
             if (EditorUtility.DisplayDialog("Creating New Scene", $"Clicking OK will possibly override the scene located at:\n{scenePath}\nIf this is what you want click ok,\nelse dismiss this dialog box\nANYTHING in that scene will be removed if you click ok anyways and it already existed!", "OK"))
             {
+                string fullPath = Application.dataPath + scenePath.Substring(7);
+                if (System.IO.File.Exists(fullPath)) System.IO.File.Copy(fullPath, fullPath + ".bak", true);
+
                 var newScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
                 EditorSceneManager.SaveScene(newScene, scenePath);
             }
