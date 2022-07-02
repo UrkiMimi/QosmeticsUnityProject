@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using System.Diagnostics;
 using Qosmetics.Core;
 using System.IO;
@@ -27,9 +28,25 @@ public class WhackerEditor : Editor
         if (packageSettingsOpened)
         {
             EditorGUILayout.BeginVertical("box");
-            whacker.ObjectName = EditorGUILayout.TextField("Name", whacker.ObjectName);
-            whacker.Author = EditorGUILayout.TextField("Author", whacker.Author);
-            whacker.Description = EditorGUILayout.TextField("Description", whacker.Description);
+
+            ExporterUtils.ObservedStringField(whacker.ObjectName, "Name", newString => {
+                UnityEditor.Undo.RecordObject(whacker, "Changed whacker name");
+                whacker.ObjectName = newString;
+                EditorSceneManager.MarkSceneDirty(whacker.gameObject.scene);
+            });
+
+            ExporterUtils.ObservedStringField(whacker.Author, "Author", newString => {
+                UnityEditor.Undo.RecordObject(whacker, "Changed whacker author");
+                whacker.Author = newString;
+                EditorSceneManager.MarkSceneDirty(whacker.gameObject.scene);
+            });
+
+            ExporterUtils.ObservedStringField(whacker.Description, "Description", newString => {
+                UnityEditor.Undo.RecordObject(whacker, "Changed whacker description");
+                whacker.Description = newString;
+                EditorSceneManager.MarkSceneDirty(whacker.gameObject.scene);
+            });
+
             EditorGUILayout.EndVertical();
         }
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
@@ -49,7 +66,12 @@ public class WhackerEditor : Editor
                     whacker.Thumbnail = AssetDatabase.LoadMainAssetAtPath(path) as Texture2D;
             }
 
-            whacker.Thumbnail = EditorGUILayout.ObjectField("Thumbnail", whacker.Thumbnail, typeof(Texture2D), false) as Texture2D;
+            ExporterUtils.ObservedObjectField<Texture2D>(whacker.Thumbnail, "Thumbnail", false, newTexture => { 
+                UnityEditor.Undo.RecordObject(whacker, "Changed whacker thumbnail");
+                whacker.Thumbnail = newTexture;
+                EditorSceneManager.MarkSceneDirty(whacker.gameObject.scene);
+            });
+
             EditorGUILayout.EndVertical();
         }
         /*

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using System.IO;
 using Qosmetics.Core;
 [CustomEditor(typeof(Qosmetics.Walls.Box))]
@@ -29,9 +30,25 @@ public class BoxEditor : Editor
         {
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.BeginVertical();
-            box.ObjectName = EditorGUILayout.TextField("Name", box.ObjectName);
-            box.Author = EditorGUILayout.TextField("Author", box.Author);
-            box.Description = EditorGUILayout.TextField("Description", box.Description);
+            
+            ExporterUtils.ObservedStringField(box.ObjectName, "Name", newString => {
+                UnityEditor.Undo.RecordObject(box, "Changed box name");
+                box.ObjectName = newString;
+                EditorSceneManager.MarkSceneDirty(box.gameObject.scene);
+            });
+
+            ExporterUtils.ObservedStringField(box.Author, "Author", newString => {
+                UnityEditor.Undo.RecordObject(box, "Changed box author");
+                box.Author = newString;
+                EditorSceneManager.MarkSceneDirty(box.gameObject.scene);
+            });
+
+            ExporterUtils.ObservedStringField(box.Description, "Description", newString => {
+                UnityEditor.Undo.RecordObject(box, "Changed box description");
+                box.Description = newString;
+                EditorSceneManager.MarkSceneDirty(box.gameObject.scene);
+            });
+
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndHorizontal();
         }
@@ -65,7 +82,12 @@ public class BoxEditor : Editor
                     box.Thumbnail = AssetDatabase.LoadMainAssetAtPath(path) as Texture2D;
             }
 
-            box.Thumbnail = EditorGUILayout.ObjectField("Thumbnail", box.Thumbnail, typeof(Texture2D), false) as Texture2D;
+            ExporterUtils.ObservedObjectField<Texture2D>(box.Thumbnail, "Thumbnail", false, newTexture => { 
+                UnityEditor.Undo.RecordObject(box, "Changed box thumbnail");
+                box.Thumbnail = newTexture;
+                EditorSceneManager.MarkSceneDirty(box.gameObject.scene);
+            });
+
             EditorGUILayout.EndVertical();
         }
 

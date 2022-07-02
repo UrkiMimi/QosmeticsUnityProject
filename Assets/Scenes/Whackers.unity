@@ -591,11 +591,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trailId: 0
-  colorType: 2
+  colorType: 0
   trailColor: {r: 1, g: 1, b: 1, a: 1}
   multiplierColor: {r: 1, g: 1, b: 1, a: 1}
   length: 14
-  whiteStep: 0
+  whiteStep: 0.098
   trailMaterial: {fileID: 2100000, guid: 215c9da4bf99713478473c01d1ca90e6, type: 2}
   topTransform: {fileID: 53433250}
   bottomTransform: {fileID: 347478174}
@@ -672,7 +672,7 @@ MonoBehaviour:
     hasTrail: 1
   leftSaber: {fileID: 878863026}
   rightSaber: {fileID: 73152947}
-  thumbnail: {fileID: 2800000, guid: fe26fcbf61775764a86889cb6301e1db, type: 3}
+  thumbnail: {fileID: 2800000, guid: 69c67a1b41a655041b03140d6e3c7ad3, type: 3}
 --- !u!4 &1952082116
 Transform:
   m_ObjectHideFlags: 0
@@ -735,7 +735,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trailId: 0
-  colorType: 2
+  colorType: 1
   trailColor: {r: 1, g: 1, b: 1, a: 1}
   multiplierColor: {r: 1, g: 1, b: 1, a: 1}
   length: 14

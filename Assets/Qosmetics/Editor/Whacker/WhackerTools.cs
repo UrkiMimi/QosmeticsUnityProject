@@ -18,6 +18,7 @@ namespace Qosmetics.Sabers
         public bool ShowWhackerGuides = true;
         public bool ShowTrailGuides = true;
         public bool ShowTrailPreview = false;
+        public bool FlipLeftTrail = false;
         
         // Preview visuals
         public bool PreviewCC = true;
@@ -28,7 +29,7 @@ namespace Qosmetics.Sabers
 
         QosmeticsProjectSettings _projectSettings;
         Whacker selectedWhacker = null;
-
+        public Whacker SelectedWhacker { get => selectedWhacker; }
         bool _isGuidesOpen = false;
         bool _isCreateSaberOpen = false;
         bool _isFixingOpen = false;
@@ -104,7 +105,14 @@ namespace Qosmetics.Sabers
                     {
                         SceneView.RepaintAll();
                     });
+
                 }
+                
+                UITools.ChangedToggle(ref FlipLeftTrail, "Flip Left Trail", val => 
+                { 
+                    SceneView.RepaintAll();
+                });
+
             }
             UITools.EndSection();
 
@@ -250,7 +258,11 @@ namespace Qosmetics.Sabers
             var gizmoWidth = trail.Length / 20.0f;
 
             Gizmos.color = isLeft ? instance.CustomColorLeft : instance.CustomColorRight;
-            Gizmos.DrawWireCube(trail.bottomTransform.position + new Vector3(0.025f + gizmoWidth / 2, 0, trailWidth / 2), new Vector3(gizmoWidth, 0.05f, trailWidth));
+            var offsetpos = new Vector3(0.025f + gizmoWidth / 2, 0, trailWidth / 2);
+            
+            if (isLeft && instance.FlipLeftTrail) offsetpos.x *= -1;
+
+            Gizmos.DrawWireCube(trail.bottomTransform.position + offsetpos, new Vector3(gizmoWidth, 0.05f, trailWidth));
             Gizmos.color = Color.white;
         }
 

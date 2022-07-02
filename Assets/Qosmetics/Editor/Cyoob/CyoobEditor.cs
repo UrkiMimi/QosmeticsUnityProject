@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using System.IO;
 using System.Diagnostics;
 using Qosmetics.Core;
@@ -31,9 +32,25 @@ public class CyoobEditor : Editor
         {
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.BeginVertical();
-            cyoob.ObjectName = EditorGUILayout.TextField("Name", cyoob.ObjectName);
-            cyoob.Author = EditorGUILayout.TextField("Author", cyoob.Author);
-            cyoob.Description = EditorGUILayout.TextField("Description", cyoob.Description);
+            
+            ExporterUtils.ObservedStringField(cyoob.ObjectName, "Name", newString => {
+                UnityEditor.Undo.RecordObject(cyoob, "Changed cyoob name");
+                cyoob.ObjectName = newString;
+                EditorSceneManager.MarkSceneDirty(cyoob.gameObject.scene);
+            });
+
+            ExporterUtils.ObservedStringField(cyoob.Author, "Author", newString => {
+                UnityEditor.Undo.RecordObject(cyoob, "Changed cyoob author");
+                cyoob.Author = newString;
+                EditorSceneManager.MarkSceneDirty(cyoob.gameObject.scene);
+            });
+
+            ExporterUtils.ObservedStringField(cyoob.Description, "Description", newString => {
+                UnityEditor.Undo.RecordObject(cyoob, "Changed cyoob description");
+                cyoob.Description = newString;
+                EditorSceneManager.MarkSceneDirty(cyoob.gameObject.scene);
+            });
+            
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndHorizontal();
         }
@@ -60,7 +77,12 @@ public class CyoobEditor : Editor
                     cyoob.Thumbnail = AssetDatabase.LoadMainAssetAtPath(path) as Texture2D;
             }
 
-            cyoob.Thumbnail = EditorGUILayout.ObjectField("Thumbnail", cyoob.Thumbnail, typeof(Texture2D), false) as Texture2D;
+            ExporterUtils.ObservedObjectField<Texture2D>(cyoob.Thumbnail, "Thumbnail", false, newTexture => { 
+                UnityEditor.Undo.RecordObject(cyoob, "Changed cyoob thumbnail");
+                cyoob.Thumbnail = newTexture;
+                EditorSceneManager.MarkSceneDirty(cyoob.gameObject.scene);
+            });
+
             EditorGUILayout.EndVertical();
         }
 

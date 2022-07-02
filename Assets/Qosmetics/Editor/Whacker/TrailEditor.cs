@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using Qosmetics.Sabers;
+using Qosmetics.Core;
 
 [CustomEditor(typeof(Trail))]
 public class TrailEditor : Editor
@@ -20,15 +22,61 @@ public class TrailEditor : Editor
         {
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.BeginVertical();
-            trail.topTransform = EditorGUILayout.ObjectField("Top", trail.topTransform, typeof(Transform), true) as Transform;
-            trail.bottomTransform = EditorGUILayout.ObjectField("Bottom", trail.bottomTransform, typeof(Transform), true) as Transform;
-            trail.Colortype = (Trail.ColorType)EditorGUILayout.EnumPopup("ColorType", trail.Colortype);
-            trail.trailMaterial = EditorGUILayout.ObjectField("Material", trail.trailMaterial, typeof(Material), false) as Material;
-            if (trail.Colortype == Trail.ColorType.Custom)
-                trail.TrailColor = EditorGUILayout.ColorField("Trail Color", trail.TrailColor);
-            trail.MultiplierColor = EditorGUILayout.ColorField("Multiplier Color", trail.MultiplierColor);
-            trail.Length = EditorGUILayout.IntField("Trail Length", trail.Length);
-            trail.WhiteStep = EditorGUILayout.Slider("Whitestep", trail.WhiteStep, 0.0f, 1.0f);
+            ExporterUtils.ObservedObjectField<Transform>(trail.topTransform, "Top", true, newObject => {
+                // on changed value
+                UnityEditor.Undo.RecordObject(trail, "Change trail top transform");
+                trail.topTransform = newObject;
+                EditorSceneManager.MarkSceneDirty(trail.gameObject.scene);
+            });
+
+            ExporterUtils.ObservedObjectField<Transform>(trail.bottomTransform, "Bottom", true, newObject => {
+                // on changed value
+                UnityEditor.Undo.RecordObject(trail, "Change trail bottom transform");
+                trail.bottomTransform = newObject;
+                EditorSceneManager.MarkSceneDirty(trail.gameObject.scene);
+            });
+
+            var newColorType = (Trail.ColorType)EditorGUILayout.EnumPopup("ColorType", trail.Colortype);
+            if (trail.Colortype != newColorType) {
+                UnityEditor.Undo.RecordObject(trail, "Change trail color type");
+                trail.Colortype = newColorType;
+                EditorSceneManager.MarkSceneDirty(trail.gameObject.scene);
+            }
+            
+            ExporterUtils.ObservedObjectField<Material>(trail.trailMaterial, "Material", false, newObject => {
+                UnityEditor.Undo.RecordObject(trail, "Change trail material");
+                trail.trailMaterial = newObject;
+                EditorSceneManager.MarkSceneDirty(trail.gameObject.scene);
+
+            });
+
+            // only show trail color when relevant
+            if (trail.Colortype == Trail.ColorType.Custom) {
+                ExporterUtils.ObservedColorField(trail.TrailColor, "Trail Color", newColor => {
+                    UnityEditor.Undo.RecordObject(trail, "Change trail color");
+                    trail.TrailColor = newColor;
+                    EditorSceneManager.MarkSceneDirty(trail.gameObject.scene);
+                });
+            }
+
+            ExporterUtils.ObservedColorField(trail.MultiplierColor, "Trail Color", newColor => {
+                UnityEditor.Undo.RecordObject(trail, "Change trail multiplier color");
+                trail.MultiplierColor = newColor;
+                EditorSceneManager.MarkSceneDirty(trail.gameObject.scene);
+            });
+
+            ExporterUtils.ObservedIntField(trail.Length, "Trail Length", newLength => {
+                UnityEditor.Undo.RecordObject(trail, "Change trail length");
+                trail.Length = newLength;
+                EditorSceneManager.MarkSceneDirty(trail.gameObject.scene);
+            });
+
+            ExporterUtils.ObservedSlider(trail.WhiteStep, "Whitestep", 0.0f, 1.0f, newWhiteStep => { 
+                UnityEditor.Undo.RecordObject(trail, "Change trail whitestep");
+                trail.WhiteStep = newWhiteStep;
+                EditorSceneManager.MarkSceneDirty(trail.gameObject.scene);
+            });
+
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndHorizontal();
         }
@@ -43,6 +91,7 @@ public class TrailEditor : Editor
             return;
         }
 
+
         var mat = trail.trailMaterial;
         if (!mat)
         {
@@ -56,6 +105,22 @@ public class TrailEditor : Editor
         mesh.name = "TrailPreviewMesh";
 
         var offsetVec = new Vector3(WhackerTools.instance ? trail.Length / 20.0f : 0.5f, 0, 0);
+
+        bool left = false;
+        var parent = trail.transform;
+
+        // Traverse the tree upwards and check if there is an object named LeftSaber, if so this is a left trail
+        while (parent) {
+            if (parent.name == "LeftSaber") {
+                left = true;
+                break;
+            }
+            parent = parent.parent;
+        }
+
+        if (left && WhackerTools.instance && WhackerTools.instance.FlipLeftTrail) {
+            offsetVec.x *= -1.0f;
+        }
 
         mesh.vertices = new[]
         {
@@ -95,6 +160,7 @@ public class TrailEditor : Editor
         }
 
         int[] triangles = new int[6];
+        
         for (int ti = 0, vi = 0, y = 0; y < 1; y++, vi++)
         {
             for (int x = 0; x < 1; x++, ti += 6, vi++)
@@ -105,6 +171,7 @@ public class TrailEditor : Editor
                 triangles[ti + 5] = vi + 1 + 2;
             }
         }
+
         mesh.triangles = triangles;
         mesh.RecalculateNormals();
 

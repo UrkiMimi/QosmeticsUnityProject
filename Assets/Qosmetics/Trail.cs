@@ -7,7 +7,6 @@ using Qosmetics.Core;
 
 namespace Qosmetics.Sabers
 {
-    [System.Serializable]
     public class Trail : MonoBehaviour
     {
         [System.Serializable]
@@ -37,22 +36,16 @@ namespace Qosmetics.Sabers
         [System.Serializable]
         struct TrailData
         {
-            [SerializeField]
             public int trailId;
 
-            [SerializeField]
             public ColorType colorType;
 
-            [SerializeField]
             public Trail.STrailColor trailColor;
 
-            [SerializeField]
             public Trail.STrailColor multiplierColor;
 
-            [SerializeField]
             public int length;
 
-            [SerializeField]
             public float whiteStep;
 
             public TrailData(int trailId, Trail trail)

@@ -207,5 +207,44 @@ namespace Qosmetics.Core
             return path.Substring(Application.dataPath.Length - 6);
         }
 
+        public static void ObservedObjectField<T>(T OriginalObject, string label, bool allowSceneObjects, Action<T> onChange) where T : UnityEngine.Object {
+            var oldObject = OriginalObject;
+            var newObject = (T)EditorGUILayout.ObjectField(label, OriginalObject, typeof(T), allowSceneObjects);
+            if (oldObject != newObject) {
+                onChange?.Invoke(newObject);
+            }
+        }
+
+        public static void ObservedColorField(Color originalColor, string label, Action<Color> onChange) {
+            var oldColor = originalColor;
+            var newColor = EditorGUILayout.ColorField(label, originalColor);
+            if (oldColor != newColor) {
+                onChange?.Invoke(newColor);
+            }
+        }
+
+        public static void ObservedIntField(int originalInt, string label, Action<int> onChange) {
+            var oldInt = originalInt;
+            var newInt = EditorGUILayout.IntField(label, originalInt);
+            if (oldInt != newInt) {
+                onChange?.Invoke(newInt);
+            }
+        }
+
+        public static void ObservedSlider(float originalFloat, string label, float min, float max, Action<float> onChange) {
+            var oldFloat = originalFloat;
+            var newFloat = EditorGUILayout.Slider(label, originalFloat, min, max);
+            if (oldFloat != newFloat) {
+                onChange?.Invoke(newFloat);
+            }
+        }
+
+        public static void ObservedStringField(string originalString, string label, Action<string> onChange) {
+            var oldString = originalString;
+            var newString = EditorGUILayout.TextField(label, originalString);
+            if (oldString != newString) {
+                onChange?.Invoke(newString);
+            }
+        }
     }
 }
