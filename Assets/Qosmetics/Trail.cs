@@ -12,14 +12,10 @@ namespace Qosmetics.Sabers
         [System.Serializable]
         struct STrailColor
         {
-            [SerializeField]
-            float r;
-            [SerializeField]
-            float g;
-            [SerializeField]
-            float b;
-            [SerializeField]
-            float a;
+            public float r;
+            public float g;
+            public float b;
+            public float a;
 
             public static implicit operator STrailColor(Color color) => new STrailColor(color);
             public static implicit operator Color(STrailColor color) => new Color(color.r, color.g, color.b, color.a);
@@ -114,22 +110,25 @@ namespace Qosmetics.Sabers
         public void SerializeToTextComponent()
         {
             string json = JsonConvert.SerializeObject(new TrailData(TrailID, this), new JsonSerializerSettings { Formatting = Formatting.Indented, ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
+            Debug.Log(json);
 
             gameObject.AddOrSetTextComponent(json);
 
-            string topTransformJson = JsonConvert.SerializeObject(new SerializedTrail(true, TrailID), Formatting.Indented);
-            string botTransformJson = JsonConvert.SerializeObject(new SerializedTrail(false, TrailID), Formatting.Indented);
+            string topTransformJson = JsonConvert.SerializeObject(new SerializedTrail(true, TrailID), new JsonSerializerSettings { Formatting = Formatting.Indented, ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
+            string botTransformJson = JsonConvert.SerializeObject(new SerializedTrail(false, TrailID), new JsonSerializerSettings { Formatting = Formatting.Indented, ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
+
+            Debug.Log(topTransformJson);
+            Debug.Log(botTransformJson);
 
             topTransform.gameObject.AddOrSetTextComponent(topTransformJson);
             bottomTransform.gameObject.AddOrSetTextComponent(botTransformJson);
         }
 
+        [System.Serializable]
         struct SerializedTrail
         {
-            [SerializeField]
-            bool isTop;
-            [SerializeField]
-            int trailId;
+            public bool isTop;
+            public int trailId;
 
             public SerializedTrail(bool isTop, int trailId)
             {
