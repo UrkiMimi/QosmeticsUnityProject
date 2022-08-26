@@ -12,5 +12,6 @@ static public class Utils
             txt = obj.AddComponent<Text>();
         txt.text = text;
         txt.fontSize = 0;
+        txt.enabled = false;
     }
 }
