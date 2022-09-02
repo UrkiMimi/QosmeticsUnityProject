@@ -23,7 +23,10 @@ namespace Qosmetics.Core
         /// <param name="path"></param> the path to which to export this to
         public static void ExportAsPrefabPackage(this GameObject gameObject, string prefabName, string path, Texture2D thumbnail = null)
         {
-            if (exporting) return;
+            if (exporting) {
+                Debug.LogError("Already exporting a package, not exporting another one!");
+                return;
+            }
             exporting = true;
             try
             {
@@ -95,12 +98,9 @@ namespace Qosmetics.Core
                 EditorUtility.DisplayDialog("Exportation successful!", "Exportation successful!", "OK");
                 EditorUtility.RevealInFinder(path);
             }
-            catch (Exception e)
-            {
-                throw e;
-            }
             finally
             {
+                exporting = false;
             }
         }
 
