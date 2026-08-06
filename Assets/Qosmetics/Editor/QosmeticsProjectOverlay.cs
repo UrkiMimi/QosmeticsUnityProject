@@ -36,7 +36,7 @@ public class QosmeticsProjectOverlay
             }
             var stl = new GUIStyle();
 
-            GUILayout.Window(69420, new Rect(0, 23, sceneView.position.width / 4, 40), DrawWindow, "", stl);
+            GUILayout.Window(69420, new Rect(48, 0, sceneView.position.width / 4, 40), DrawWindow, "", stl);
         }
     }
 
@@ -69,7 +69,7 @@ public class QosmeticsProjectOverlay
         GUILayout.BeginHorizontal("box");
         GUI.color = Color.white;
         //GUILayout.Label("Saber Project v" + SaberToolsUpdater.LocalVersionString);
-        GUILayout.Label("Qosmetics Project v0.1.0");
+        GUILayout.Label("Qosmetics Project v0.1.1");
         GUILayout.Space(5);
         var blk = new Color(1, 1, 1, _isDarkMode ? 0.4f : 1.0f);
         GUI.color = blk;
